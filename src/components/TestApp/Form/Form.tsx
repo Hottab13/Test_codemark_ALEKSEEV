@@ -37,8 +37,9 @@ const makeField = (Component) => ({input,meta,children,hasFeedback,label,
 const AInput = makeField(Input);
 type LoginFormOwnProps = {};
 const maxLenght = maxLengthCreator(10);
-const AddNestForm: React.FC<
-  InjectedFormProps<NestFormValueType, LoginFormOwnProps> & LoginFormOwnProps
+
+const AddForm: React.FC<
+  InjectedFormProps<FormValueType, LoginFormOwnProps> & LoginFormOwnProps
 > = ({ error, ...props }) => {
   const { handleSubmit, reset, submitting } = props;
   const dispatch = useDispatch();
@@ -95,38 +96,16 @@ const AddNestForm: React.FC<
   );
 };
 
-const AddNestReduxForm = reduxForm<NestFormValueType, LoginFormOwnProps>({
+const AddReduxForm = reduxForm<FormValueType, LoginFormOwnProps>({
   form: "form_search",
-})(AddNestForm);
-type NestFormValueType = {
+})(AddForm);
+type FormValueType = {
   value: string;
-  nestName: string;
-  nestType: any;
-  nestLocation: string;
-  nestDate: string;
-  nestTime: string;
-  nestAmountMaximum: number;
-  nestAgeRestrictions: number;
 };
-
 export const FormSearch: React.FC = () => {
   const dispatch = useDispatch();
-  const showResults = (value: NestFormValueType) => {
-    let text = "";
-    const possible =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let delay = 5000;
-    if (value.value === "delay") {
-      let timerId = setTimeout(function request() {
-        for (let i = 0; i < Math.floor(Math.random() * Math.floor(10)); i++)
-          text += possible.charAt(Math.floor(Math.random() * possible.length));
-        console.log(text);
-        dispatch(getImagesTC(text));
-        timerId = setTimeout(request, delay);
-      }, delay);
-    } else {
-      dispatch(getImagesTC(value.value));
-    }
+  const showResults = (value: FormValueType) => {
+    dispatch(getImagesTC(value.value));
   };
-  return <AddNestReduxForm onSubmit={showResults} />;
+  return <AddReduxForm onSubmit={showResults} />;
 };

@@ -61,36 +61,16 @@ export const action = {
     ({ type: "TOGGLE_IS_CLICK_TAG", payload: clickTag } as const),
 };
 
+
+
 export const getImagesTC = (TAG: string): ThunkActionType => async (
   dispatch,
   getState
 ) => {
-  dispatch(action.toggleIsFeting(true));
-  const compound = [];
-  let arrTag = TAG.split(",", 2);
-  if (arrTag.length > 1) {
-    for (let name of arrTag) {
-      let respons = await searchAPI.getImagesAPI(name);
-      dispatch(action.toggleIsFeting(false));
-      if (respons.meta.status === 200) {
-        const images = respons.data.image_url;
-        if (images === undefined) {
-          dispatch(
-            stopSubmit("form_search", { _error: "По тегу ничего не найдено" })
-          );
-        }
-        compound.push(images);
-        if (compound.length > 1) {
-          dispatch(action.setImages(compound, "compound_tag"));
-        }
-      } else {
-        dispatch(
-          stopSubmit("form_search", { _error: "Произошла http ошибка" })
-        );
-      }
-    }
-  } else {
-    let respons = await searchAPI.getImagesAPI(TAG);
+  const getRequest = async (request: string, isArr: boolean) => {
+    dispatch(action.toggleIsFeting(true));
+    let respons = await searchAPI.getImagesAPI(request);
+    console.log(respons);
     dispatch(action.toggleIsFeting(false));
     if (respons.meta.status === 200) {
       const images = respons.data.image_url;
@@ -99,12 +79,42 @@ export const getImagesTC = (TAG: string): ThunkActionType => async (
           stopSubmit("form_search", { _error: "По тегу ничего не найдено" })
         );
       }
-      dispatch(action.setImages(images, TAG));
+      if (isArr) {
+        return images;
+      } else {
+        dispatch(action.setImages(images, TAG));
+      }
     } else {
       dispatch(stopSubmit("form_search", { _error: "Произошла http ошибка" }));
     }
+  };
+  const compound: string | any[] | null = [];
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const delay = 5000;
+  let arrTag = TAG.split(",", 2);
+  if (arrTag.length > 1) {
+    for (let name of arrTag) {
+      getRequest(name, true).then((res: any) => {
+        compound.push(res);
+        if (compound.length > 1)
+          dispatch(action.setImages(compound, "compound_tag"));
+      });
+    }
+  } else if (TAG === "delay") {
+    let timerId = setTimeout(async function request() {
+      let text = "";
+      for (let i = 0; i < Math.floor(Math.random() * Math.floor(10)); i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      console.log(text);
+      getRequest(text, false);
+      timerId = setTimeout(request, delay);
+    }, delay);
+  } else {
+    getRequest(TAG, false);
   }
 };
+
 export const imagesOut = (): ThunkActionType => async (dispatch, getState) => {
   dispatch(action.setImages(null, null));
 };
@@ -120,5 +130,4 @@ export const toggleIsClickTagTC = (clickTag: string): ThunkActionType => async (
 ) => {
   dispatch(action.toggleIsClickTag(clickTag));
 };
-
 export default formSearchReducer;

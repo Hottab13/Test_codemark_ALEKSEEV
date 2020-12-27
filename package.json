@@ -15,7 +15,6 @@
     "@types/redux-form": "^8.3.0",
     "antd": "^4.8.2",
     "axios": "^0.19.2",
-    "formik": "^2.2.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-grid-system": "^7.1.1",
